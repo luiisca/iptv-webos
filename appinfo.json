@@ -1,0 +1,11 @@
+{
+  "id": "iptv-webos",
+  "version": "1.0.0",
+  "vendor": "LuiisCA",
+  "type": "web",
+  "main": "index.html",
+  "title": "IPTV WebOS",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "uiRevision": 2
+}

@@ -1,6 +1,6 @@
 {
   "name": "iptv-webos",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An intuitive iptv WebOS app for my parent's LG TV",
   "author": "",
   "main": "src/index.tsx",

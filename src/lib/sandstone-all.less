@@ -1,0 +1,190 @@
+// sandstone-all.less
+@import "./sandstone-theme.less";
+
+// SPINNER
+.spinner {
+	line-height: @sand-body-line-height;
+	vertical-align: middle;
+
+	.bg {
+		position: relative;
+		border-radius: 999px;
+		width: @sand-spinner-size;
+		height: @sand-spinner-size;
+		padding: @sand-spinner-line-margin;
+		margin-left: auto;
+		margin-right: auto;
+    background-color: @sand-spinner-bg-color;
+	}
+
+	.decorator {
+		width: @sand-spinner-size;
+		height: @sand-spinner-size;
+		position: relative;
+		background-size: cover;
+		border-radius: 999px;
+		overflow: hidden;
+		margin: 0 auto;
+		-webkit-mask-image: radial-gradient(transparent (@sand-spinner-size / 2 - @sand-spinner-line-width - 1px), black (@sand-spinner-size / 2 - @sand-spinner-line-width)); // These colors control masking, not visible colors
+		animation: spin @sand-spinner-time linear infinite;
+    
+    background:
+				radial-gradient(circle at 0% 0%, @sand-spinner-color 20%, @sand-spinner-empty-color 40%), // Visible gradient
+				radial-gradient(circle at 35% 8%, @sand-spinner-color 15%, transparent 15%); // Filler between the closest fan and center of gradient
+
+		.fan1,
+		.fan2,
+		.fan3,
+		.fan4 {
+			content: "";
+			top: 0;
+			right: 50%;
+			bottom: 50%;
+			left: 0;
+			clip-path: polygon(100% 0, 0 3%, 100% 100%); // Cut each segment into a 1/8th wedge, with a little overhang to avoid a subpixel gap from rounding error
+			transform-origin: bottom right;
+      position: absolute;
+			animation: rotate1 @sand-spinner-time linear infinite;
+      background-color: @sand-spinner-color;
+		}
+		.cap {
+			position: absolute;
+			animation: rotate4 @sand-spinner-time linear infinite;
+			top: 0;
+			right: 0;
+			bottom: 50%;
+			left: 0;
+			clip-path: circle((@sand-spinner-line-width / 2) at 50% (@sand-spinner-line-width / 2));
+			transform-origin: bottom;
+      background-color: @sand-spinner-head-color;
+		}
+		.fan2 { animation-name: rotate2; }
+		.fan3 { animation-name: rotate3; }
+		.fan4 { animation-name: rotate4; }
+	}
+
+	.client {
+		.sand-body-text();
+		margin-top: @sand-spotlight-outset;
+    color: @sand-spinner-text-color;
+	}
+}
+
+@keyframes spin {
+	@turn-offset: (2 / 8);
+	0%   { transform: rotate(0turn + @turn-offset); }
+	33%   { transform: rotate(0.25turn + @turn-offset); }
+	80%   { transform: rotate(0.7turn + @turn-offset); }
+	85%   { transform: rotate(0.75turn + @turn-offset); }
+	100%  { transform: rotate(1turn + @turn-offset); }
+}
+@keyframes rotate1 {
+	0%, 100% { transform: rotate(0turn); }
+	33% { transform: rotate((1turn / 8)); }
+}
+@keyframes rotate2 {
+	0%, 100% { transform: rotate(0turn); }
+	33% { transform: rotate((2turn / 8)); }
+}
+@keyframes rotate3 {
+	0%, 100% { transform: rotate(0turn); }
+	33% { transform: rotate((3turn / 8)); }
+}
+@keyframes rotate4 {
+	0%, 100% { transform: rotate(0turn); }
+	33% { transform: rotate((4turn / 8)); }
+}
+
+
+// POPUP
+.popup {
+	height: 100%;
+	max-height: 100%;
+	max-width: 100%;
+	border-radius: @sand-popup-border-radius;
+  background-color: @sand-popup-bg-color;
+
+	.body {
+		.sand-body-text();
+		padding: @sand-popup-padding;
+		box-sizing: border-box;
+		pointer-events: auto;
+	}
+
+	&.center {
+		position: absolute;
+		height: auto;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}
+
+// ITEM
+.item {
+	font-size: @sand-item-font-size;
+	padding: @sand-item-vertical-padding;
+	font-weight: @sand-item-font-weight;
+	line-height: @sand-item-line-height;
+	height: @sand-item-height;
+	display: flex;
+	position: relative;
+	color: inherit;
+	margin: @sand-item-margin;
+  align-items: center;
+
+	.bg {
+		position: absolute;
+		.position(0);
+		border-radius: @sand-item-border-radius;
+	}
+
+  &:focus {
+    color: black;
+    .bg {
+      background-color: white;
+    }
+  }
+
+	.slotAfter {
+		margin-inline-start: 24px;
+	}
+
+	.slotBefore {
+		margin-inline-end: 24px;
+	}
+}
+
+// BUTTON
+.button {
+	.sand-body-text();
+	height: @sand-button-height;
+	min-width: @sand-button-height;
+	padding: 0 @sand-button-h-padding;
+	margin: @sand-button-margin;
+	text-align: center;
+	vertical-align: middle;
+  border-radius: @sand-button-border-radius;
+  background-color: @sand-button-bg-color;
+  color: @sand-button-text-color;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:focus {
+    background-color: white;
+    color: black;
+  }
+}
+
+// HEADING
+.heading {
+  font-family: @sand-font-family;
+  color: white;
+  margin: 12px 0;
+
+  &.large { font-size: @sand-heading-large-font-size; }
+  &.medium { font-size: @sand-heading-medium-font-size; }
+  &.small { font-size: @sand-heading-small-font-size; }
+}

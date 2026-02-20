@@ -1,0 +1,74 @@
+// sandstone-theme.less
+@sand-font-family: 'Soma Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+@sand-non-latin-font-family: 'Soma Sans', sans-serif;
+
+@sand-body-font-size: 30px;
+@sand-body-line-height: 1.2;
+
+@sand-spinner-size: 114px;
+@sand-spinner-small-size: 78px;
+@sand-spinner-line-width: 10px;
+@sand-spinner-small-line-width: 8px;
+@sand-spinner-line-margin: 0px;
+@sand-spinner-small-line-margin: 0px;
+@sand-spinner-time: 1.5s;
+@sand-spinner-font-weight: 400;
+@sand-spotlight-outset: 6px;
+@sand-spinner-text-color: #E6E6E6;
+@sand-spinner-bg-color: rgba(0, 0, 0, 0.4);
+@sand-spinner-color: #E6E6E6;
+@sand-spinner-empty-color: rgba(230, 230, 230, 0.1);
+@sand-spinner-head-color: #E6E6E6;
+
+@sand-popup-border-radius: 18px;
+@sand-popup-padding: 30px;
+@sand-popup-bg-color: rgba(30, 30, 30, 0.95);
+
+@sand-button-height: 90px;
+@sand-button-border-radius: 12px;
+@sand-button-h-padding: 36px;
+@sand-button-margin: 6px;
+@sand-button-text-color: #E6E6E6;
+@sand-button-bg-color: rgba(255, 255, 255, 0.1);
+
+@sand-item-font-size: 36px;
+@sand-item-font-weight: 400;
+@sand-item-height: 96px;
+@sand-item-margin: 0;
+@sand-item-border-radius: 12px;
+@sand-item-vertical-padding: 12px;
+@sand-item-line-height: 1.2;
+
+@sand-heading-large-font-size: 60px;
+@sand-heading-medium-font-size: 48px;
+@sand-heading-small-font-size: 36px;
+
+.sand-body-text() {
+  font-family: @sand-font-family;
+  font-size: @sand-body-font-size;
+}
+
+.applySkins(@rules) {
+  @rules();
+}
+
+.focus(@rules, @parent: ~"") {
+  &:focus {
+    @rules();
+  }
+}
+
+.sand-spotlight-padding(@p) {
+  padding: @p;
+}
+
+.enact-locale-line-height(@lh, @tall) {
+  line-height: @lh;
+}
+
+.position(@p) {
+  top: @p;
+  right: @p;
+  bottom: @p;
+  left: @p;
+}

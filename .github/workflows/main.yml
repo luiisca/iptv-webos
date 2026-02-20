@@ -41,8 +41,7 @@ jobs:
         run: npm install -g @webos-tools/cli
       - name: Build and Package
         run: |
-          npm run pack-p
-          ares-package ./dist -o .
+          npm run package
       - name: Upload IPK to Release
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}

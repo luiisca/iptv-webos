@@ -7,6 +7,7 @@ export interface Channel {
   language: string; // ISO 639-2/3 code (e.g., 'spa', 'eng')
   country: string;  // ISO 3166-1 alpha-2 code (e.g., 'PE', 'US')
   isGeoBlocked: boolean;
+  isBroadcast?: boolean;
 }
 
 export interface CountryMeta {

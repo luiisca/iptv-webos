@@ -1,5 +1,5 @@
 // migrated from src/App/App.tsx (state management part)
-import { tick, untrack } from 'svelte';
+import { untrack } from 'svelte';
 import { get } from 'svelte/store';
 import { t } from './i18n';
 import {
@@ -18,7 +18,7 @@ export interface Alert {
 
 class AppState {
   groups = $state<ChannelGroup[]>([]);
-  activeGroupId = $state<string>('favorites');
+  activeGroupId = $state<string>('');
   currentIndex = $state<number>(0);
   favorites = $state<Channel[]>([]);
   userMeta = $state<UserMeta | null>(null);
@@ -32,6 +32,7 @@ class AppState {
   alerts = $state<Alert[]>([]);
 
   playlist = $derived.by(() => {
+    this.activeGroupId // force updte
     // untrack groups to ensure currently playing playlist is not replaced when a new favorite is added
     const activeGroup = untrack(() => this.groups).find(g => g.id === this.activeGroupId);
     return activeGroup ? activeGroup.channels : [];

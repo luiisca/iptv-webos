@@ -68,8 +68,6 @@
   onmouseleave={handleMouseLeave}
   {...rest}
 >
-  <div class="bg"></div>
-
   {#if slotBefore}
     <div class="slotBefore">
       {@render slotBefore()}
@@ -123,10 +121,9 @@
     }
 
     &:focus {
-      .bg {
-        background-color: #e6e6e6;
-        opacity: 1;
-      }
+      border-radius: 8px;
+      background-color: #e6e6e6;
+      opacity: 1;
       .itemContent {
         color: #000 !important;
       }

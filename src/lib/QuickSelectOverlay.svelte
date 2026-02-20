@@ -131,6 +131,7 @@
   open={numericInput.length > 0 || isFetching}
   position="left"
   class="quickPopup"
+  parentClassName="parentQuickPopup"
 >
   <div class="container">
     <div class="inputSection">
@@ -177,12 +178,18 @@
   @import "@sandstone/styles/variables.less";
   @import "@sandstone/styles/colors.less";
 
+  :global(.parentQuickPopup) {
+    display: flex;
+    align-items: flex-end;
+    height: 100vh !important;
+  }
   :global(.quickPopup) {
     width: 900px !important;
-    max-height: calc(100vh - 560px) !important;
+    max-height: calc(70vh) !important;
     border-radius: 12px !important;
-    margin-top: 500px !important;
+    margin: 0px !important;
     margin-left: @sand-app-keepout !important;
+    margin-bottom: @sand-app-keepout !important;
 
     :global(.inputSection) {
       margin: 15px 18px !important;
@@ -209,15 +216,22 @@
     }
 
     :global(.quickItem) {
+      height: auto !important;
       margin: 0 18px 15px !important;
-      padding: 3px 24px !important;
+      padding: 48px 24px !important;
 
+      :global(.slotBefore) {
+        margin-right: 24px !important;
+      }
       :global(.channelNumber) {
         color: #aaa !important;
         font-weight: 800;
         font-size: @sand-heading-small-font-size !important;
       }
 
+      :global(.marquee) {
+        line-height: 0 !important;
+      }
       :global(.text) {
         line-height: 0;
         :global(.name) {
@@ -237,9 +251,6 @@
       }
     }
     :global(.quickItem:focus) {
-      :global(.bg) {
-        border-radius: 8px;
-      }
       :global(.name) {
         color: #000000 !important;
       }

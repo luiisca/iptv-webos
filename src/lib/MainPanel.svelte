@@ -133,7 +133,11 @@
 
 <div class="main-panel">
   <!-- svelte-ignore a11y_media_has_caption -->
-  <video bind:this={videoRef} autoplay={false}></video>
+  <video
+    bind:this={videoRef}
+    autoplay={false}
+    style="width: 100vw !important; height: 100vh !important;"
+  ></video>
 
   <ChannelInfoOverlay visible={isInfoOverlayVisible} />
 

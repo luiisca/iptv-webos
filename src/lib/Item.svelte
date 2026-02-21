@@ -109,7 +109,6 @@
     text-decoration: none;
     user-select: none;
     cursor: pointer;
-    overflow: hidden;
     outline: none;
 
     .itemContent {

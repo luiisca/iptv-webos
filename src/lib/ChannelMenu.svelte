@@ -356,7 +356,7 @@
   @import "@sandstone/styles/variables.less";
 
   :global(.channel-menu-popup) {
-    width: 80vh !important;
+    width: 80vw !important;
     height: 80vh !important;
     max-height: 80vh !important;
     background-color: transparent !important;

@@ -208,7 +208,7 @@
   }
 
   function handleKeyDown(ev: KeyboardEvent) {
-    if (!appState.isOverlayOpen) return;
+    if (!appState.isOverlayOpen || currentItems.length === 0) return;
 
     const { keyCode } = ev;
 
@@ -221,25 +221,23 @@
         break;
       case 38: // UP
         ev.preventDefault();
-        selectedIndex = Math.max(0, selectedIndex - 1);
+        selectedIndex =
+          (selectedIndex - 1 + currentItems.length) % currentItems.length;
         break;
       case 40: // DOWN
         ev.preventDefault();
-        selectedIndex = Math.min(currentItems.length - 1, selectedIndex + 1);
+        selectedIndex = (selectedIndex + 1) % currentItems.length;
         break;
       case 27: // ESC
         ev.preventDefault();
         close();
         break;
       case 461: // BACK
-      case 8:
+      case 8: // BACKSPACE
         ev.preventDefault();
-        console.log("BACK pressed, menuState:", menuState);
         if (menuState === MenuState.MAIN) {
-          console.log("In MAIN, closing menu");
           close();
         } else {
-          console.log("Not in MAIN, going back");
           goBack();
         }
         break;

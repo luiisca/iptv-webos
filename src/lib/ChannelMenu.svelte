@@ -262,10 +262,17 @@
 
   $effect(() => {
     if (appState.isOverlayOpen) {
+      // Access reactive properties to track them
+      selectedIndex;
+      currentItems;
+
       tick().then(() => {
         const selectedItem = document.querySelector(".menu-item.selected");
         if (selectedItem) {
-          selectedItem.scrollIntoView({ block: "center" });
+          selectedItem.scrollIntoView({
+            block: "center",
+            behavior: "smooth",
+          });
         }
       });
     }
@@ -319,10 +326,6 @@
             class="menu-item {idx === selectedIndex ? 'selected' : ''}"
             onclick={item.action}
             selected={idx === selectedIndex}
-            label={null}
-            slotBefore={null}
-            slotAfter={null}
-            onfocus={null}
           >
             {item.label}
             {#if item.sublabel}

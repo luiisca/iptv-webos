@@ -271,7 +271,7 @@
         if (selectedItem) {
           selectedItem.scrollIntoView({
             block: "center",
-            behavior: "smooth",
+            behavior: "auto",
           });
         }
       });

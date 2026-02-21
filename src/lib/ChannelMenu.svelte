@@ -235,7 +235,7 @@
       case 461: // BACK
       case 8: // BACKSPACE
         ev.preventDefault();
-        if (menuState === MenuState.MAIN) {
+        if ($state.snapshot(menuState) === MenuState.MAIN) {
           close();
         } else {
           goBack();

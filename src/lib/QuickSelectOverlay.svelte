@@ -15,6 +15,7 @@
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
   let matches = $derived.by(() => {
+    // TODO: still failing after adding the very first favoriet channel
     appState.favorites; // force update when new frist favorite added TODO: fix
 
     if (!numericInput) return [];
@@ -140,6 +141,7 @@
   $effect(() => {
     if (numericInput.length > 0) {
       tick().then(() => {
+        // TODO: might not be needed since Scroller already handles scrolling
         const selectedItem = document.querySelector(".quickItem.selected");
         if (selectedItem) {
           selectedItem.scrollIntoView({ block: "center" });

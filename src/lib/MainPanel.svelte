@@ -30,7 +30,7 @@
     const { keyCode } = ev;
 
     if (appState.isOverlayOpen) {
-      if (keyCode === 406 || keyCode === 461 || keyCode === 27) {
+      if (keyCode === 406 || keyCode === 27) {
         // BLUE or BACK or ESC
         ev.preventDefault();
         appState.isOverlayOpen = false;
@@ -52,17 +52,18 @@
         appState.navigateToChannel(appState.currentIndex - 1);
         break;
       case 406: // BLUE
+      case 32: // `
         ev.preventDefault();
         appState.isOverlayOpen = true;
         break;
       case 461: // BACK
-      case 27: // ESC
         ev.preventDefault();
         if (!document.querySelector(".quickPopup")) {
           appState.isOverlayOpen = true;
         }
         break;
       case 403: // RED
+      case 192:
         ev.preventDefault();
         if (appState.currentChannel) {
           // TODO: removing all favorites should move to the last one

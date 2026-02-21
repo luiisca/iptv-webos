@@ -1,5 +1,7 @@
 <!-- migrated from src/components/ChannelMenu/ChannelMenu.tsx -->
 <script lang="ts">
+  import { onMount, tick } from "svelte";
+  import { on } from "svelte/events";
   import Popup from "./Popup.svelte";
   import Button from "./Button.svelte";
   import Item from "./Item.svelte";
@@ -36,6 +38,7 @@
   let selectedCountry = $state<string | null>(null);
   let countryChannels = $state<Channel[]>([]);
   let isFetching = $state(false);
+  let selectedIndex = $state(0);
 
   const allChannels = $derived.by(() => {
     return appState.groups.flatMap((g) =>
@@ -45,6 +48,79 @@
         groupDisplayName: g.displayName,
       })),
     );
+  });
+
+  interface MenuItem {
+    label: any;
+    sublabel?: string;
+    action: () => void;
+    onfocus?: () => void;
+  }
+
+  const currentItems = $derived.by<MenuItem[]>(() => {
+    switch (menuState) {
+      case MenuState.MAIN:
+        return [
+          {
+            label: $t("Favorites"),
+            action: () => (menuState = MenuState.FAVORITES),
+          },
+          {
+            label: $t("All Channels"),
+            action: () => (menuState = MenuState.ALL_CHANNELS),
+          },
+          {
+            label: $t("Categories"),
+            action: () => (menuState = MenuState.CATEGORIES),
+          },
+          {
+            label: $t("Countries"),
+            action: () => (menuState = MenuState.COUNTRIES),
+          },
+          { label: $t("Back"), action: close },
+        ];
+      case MenuState.FAVORITES:
+        return appState.favoriteChannels.map((c) => ({
+          label: c.name,
+          sublabel: c.country,
+          action: () => handleChannelSelect(c, "favorites"),
+        }));
+      case MenuState.ALL_CHANNELS:
+        return allChannels.map((c, idx) => ({
+          label: c.name,
+          sublabel: `${c.country} | ${c.groupDisplayName}`,
+          action: () => handleChannelSelect(c, c.groupId),
+          onfocus: () => handleFocus(idx),
+        }));
+      case MenuState.CATEGORIES:
+        return hardcodedCategories.map((cat) => ({
+          label: cat.charAt(0).toUpperCase() + cat.slice(1),
+          action: () => selectCategory(cat),
+        }));
+      case MenuState.CATEGORY_DETAIL:
+        return categoryChannels.map((c) => ({
+          label: c.name,
+          sublabel: c.country,
+          action: () => handleChannelSelect(c, `category_${selectedCategory}`),
+        }));
+      case MenuState.COUNTRIES:
+        if (!allCountryMetadata) return [];
+        return Object.entries(allCountryMetadata)
+          .filter(([_, meta]) => meta.hasChannels)
+          .map(([code, meta]) => ({
+            label: meta.country,
+            sublabel: code,
+            action: () => selectCountry(code, meta.country),
+          }));
+      case MenuState.COUNTRY_DETAIL:
+        return countryChannels.map((c) => ({
+          label: c.name,
+          sublabel: c.language,
+          action: () => handleChannelSelect(c, `country_${selectedCountry}`),
+        }));
+      default:
+        return [];
+    }
   });
 
   async function loadCountries() {
@@ -61,11 +137,6 @@
   });
 
   function handleChannelSelect(channel: any, groupId?: string) {
-    // If it's a category/country channel not in appState.groups, we might need to add it
-    // But for simplicity let's just use playChannel and rely on it finding the group if it exists
-    // or maybe add a generic way to play an arbitrary channel.
-    // Actually, appState.playChannel finds the index in the group.
-
     const targetGroupId = groupId || "generic";
     if (groupId) {
       const groupExists = appState.groups.some((g) => g.id === groupId);
@@ -89,7 +160,10 @@
   }
 
   async function handleFocus(idx: number) {
-    if (menuState === MenuState.ALL_CHANNELS && idx + 20 >= allChannels.length) {
+    if (
+      menuState === MenuState.ALL_CHANNELS &&
+      idx + 20 >= allChannels.length
+    ) {
       if (!isFetching && !appState.isAllFetched) {
         isFetching = true;
         await appState.loadMoreGroups();
@@ -133,6 +207,74 @@
     menuState = MenuState.MAIN;
   }
 
+  function handleKeyDown(ev: KeyboardEvent) {
+    if (!appState.isOverlayOpen) return;
+
+    const { keyCode } = ev;
+
+    switch (keyCode) {
+      case 13: // ENTER
+        ev.preventDefault();
+        if (currentItems[selectedIndex]) {
+          currentItems[selectedIndex].action();
+        }
+        break;
+      case 38: // UP
+        ev.preventDefault();
+        selectedIndex = Math.max(0, selectedIndex - 1);
+        break;
+      case 40: // DOWN
+        ev.preventDefault();
+        selectedIndex = Math.min(currentItems.length - 1, selectedIndex + 1);
+        break;
+      case 27: // ESC
+        ev.preventDefault();
+        close();
+        break;
+      case 461: // BACK
+      case 8:
+        ev.preventDefault();
+        console.log("BACK pressed, menuState:", menuState);
+        if (menuState === MenuState.MAIN) {
+          console.log("In MAIN, closing menu");
+          close();
+        } else {
+          console.log("Not in MAIN, going back");
+          goBack();
+        }
+        break;
+    }
+  }
+
+  $effect(() => {
+    menuState; // trigger on state change
+    selectedIndex = 0;
+  });
+
+  $effect(() => {
+    if (
+      menuState === MenuState.ALL_CHANNELS &&
+      currentItems[selectedIndex]?.onfocus
+    ) {
+      currentItems[selectedIndex].onfocus!();
+    }
+  });
+
+  $effect(() => {
+    if (appState.isOverlayOpen) {
+      tick().then(() => {
+        const selectedItem = document.querySelector(".menu-item.selected");
+        if (selectedItem) {
+          selectedItem.scrollIntoView({ block: "center" });
+        }
+      });
+    }
+  });
+
+  onMount(() => {
+    return on(window, "keydown", handleKeyDown);
+  });
+
   const title = $derived.by(() => {
     switch (menuState) {
       case MenuState.MAIN:
@@ -155,9 +297,14 @@
   });
 </script>
 
-<Popup open={appState.isOverlayOpen} onClose={close} class="channel-menu-popup">
+<Popup
+  open={appState.isOverlayOpen}
+  onClose={close}
+  position="center"
+  class="channel-menu-popup"
+>
   <div class="menu-container">
-    <Header type="mini" {title} class="overlay-header">
+    <Header type="mini" {title} subtitle="" class="overlay-header">
       {#snippet slotBefore()}
         {#if menuState !== MenuState.MAIN}
           <Button size="small" icon="arrowlargeleft" onclick={goBack} />
@@ -167,115 +314,37 @@
 
     <div class="content">
       <Scroller direction="vertical" {isFetching}>
-        {#if menuState === MenuState.MAIN}
-          <Item onclick={() => (menuState = MenuState.FAVORITES)}
-            >{$t("Favorites")}</Item
+        {#each currentItems as item, idx}
+          <Item
+            class="menu-item {idx === selectedIndex ? 'selected' : ''}"
+            onclick={item.action}
+            selected={idx === selectedIndex}
+            label={null}
+            slotBefore={null}
+            slotAfter={null}
+            onfocus={null}
           >
-          <Item onclick={() => (menuState = MenuState.ALL_CHANNELS)}
-            >{$t("All Channels")}</Item
-          >
-          <Item onclick={() => (menuState = MenuState.CATEGORIES)}
-            >{$t("Categories")}</Item
-          >
-          <Item onclick={() => (menuState = MenuState.COUNTRIES)}
-            >{$t("Countries")}</Item
-          >
-          <Item onclick={close}>{$t("Back")}</Item>
-        {:else if menuState === MenuState.FAVORITES}
-          {#if Object.keys(appState.favorites).length > 0}
-            {#each appState.favoriteChannels as channel}
-              <Item onclick={() => handleChannelSelect(channel, "favorites")}>
-                {channel.name}
-                {#snippet label()}
-                  <span class="channel-label">{channel.country}</span>
-                {/snippet}
-              </Item>
-            {/each}
-          {:else}
-            <div class="empty-state">{$t("No favorites yet.")}</div>
-          {/if}
-        {:else if menuState === MenuState.ALL_CHANNELS}
-          {#each allChannels as channel, idx}
-            <Item
-              onfocus={() => handleFocus(idx)}
-              onclick={() => handleChannelSelect(channel, channel.groupId)}
-            >
-              {channel.name}
+            {item.label}
+            {#if item.sublabel}
               {#snippet label()}
-                <span class="channel-label"
-                  >{channel.country} | {channel.groupDisplayName}</span
-                >
+                <span class="channel-label">{item.sublabel}</span>
               {/snippet}
-            </Item>
-          {/each}
-          {#if isFetching}
-            <div class="loading-container">
-              <Spinner size="small" />
-            </div>
-          {/if}
-        {:else if menuState === MenuState.CATEGORIES}
-          {#each hardcodedCategories as category}
-            <Item onclick={() => selectCategory(category)}>
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </Item>
-          {/each}
-        {:else if menuState === MenuState.CATEGORY_DETAIL}
-          {#if isFetching}
-            <div class="loading-container">
-              <Spinner size="small" />
-            </div>
-          {:else if categoryChannels.length > 0}
-            {#each categoryChannels as channel}
-              <Item
-                onclick={() =>
-                  handleChannelSelect(channel, `category_${selectedCategory}`)}
-              >
-                {channel.name}
-                {#snippet label()}
-                  <span class="channel-label">{channel.country}</span>
-                {/snippet}
-              </Item>
-            {/each}
-          {:else}
-            <div class="empty-state">{$t("No channels found.")}</div>
-          {/if}
-        {:else if menuState === MenuState.COUNTRIES}
-          {#if allCountryMetadata}
-            {#each Object.entries(allCountryMetadata) as [code, meta]}
-              {#if meta.hasChannels}
-                <Item onclick={() => selectCountry(code, meta.country)}>
-                  {meta.country}
-                  {#snippet label()}
-                    <span class="channel-label">{code}</span>
-                  {/snippet}
-                </Item>
-              {/if}
-            {/each}
-          {:else}
-            <div class="loading-container">
-              <Spinner size="small" />
-            </div>
-          {/if}
-        {:else if menuState === MenuState.COUNTRY_DETAIL}
-          {#if isFetching}
-            <div class="loading-container">
-              <Spinner size="small" />
-            </div>
-          {:else if countryChannels.length > 0}
-            {#each countryChannels as channel}
-              <Item
-                onclick={() =>
-                  handleChannelSelect(channel, `country_${selectedCountry}`)}
-              >
-                {channel.name}
-                {#snippet label()}
-                  <span class="channel-label">{channel.language}</span>
-                {/snippet}
-              </Item>
-            {/each}
-          {:else}
-            <div class="empty-state">{$t("No channels found.")}</div>
-          {/if}
+            {/if}
+          </Item>
+        {/each}
+
+        {#if isFetching && currentItems.length === 0}
+          <div class="loading-container">
+            <Spinner size="small" />
+          </div>
+        {:else if !isFetching && currentItems.length === 0}
+          <div class="empty-state">
+            {#if menuState === MenuState.FAVORITES}
+              {$t("No favorites yet.")}
+            {:else}
+              {$t("No channels found.")}
+            {/if}
+          </div>
         {/if}
       </Scroller>
     </div>
@@ -286,14 +355,17 @@
   @import "@sandstone/styles/variables.less";
 
   :global(.channel-menu-popup) {
-    width: 30vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    top: 0 !important;
-    right: 0 !important;
-    left: auto !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
+    width: 80vh !important;
+    height: 80vh !important;
+    max-height: 80vh !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+
+    :global(.body) {
+      height: 100% !important;
+      background-color: transparent !important;
+      padding: 0 !important;
+    }
   }
 
   .menu-container {
@@ -301,18 +373,37 @@
     display: flex;
     flex-direction: column;
     color: white;
-    background-color: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
+    background-color: transparent;
   }
 
   :global(.overlay-header) {
-    padding: 40px 20px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    background-color: transparent;
   }
 
   .content {
     flex: 1;
     overflow: hidden;
+    background-color: transparent;
+  }
+
+  :global(.menu-item) {
+    margin: 5px 10px !important;
+    border-radius: 10px !important;
+    transition: background-color 0.2s;
+  }
+
+  :global(.menu-item.selected) {
+    background-color: #e6e6e6 !important;
+    color: #000000 !important;
+
+    :global(.channel-label) {
+      color: #333333 !important;
+    }
+
+    :global(.marquee) {
+      color: #000000 !important;
+    }
   }
 
   .channel-label {

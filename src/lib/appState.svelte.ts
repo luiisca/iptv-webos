@@ -208,7 +208,7 @@ class AppState {
         this.setActiveGroupId(this.groups[nextGroupIdx].id);
       }
     } else if (index < 0) {
-      if (groupIndex === 0 && !this.isAllFetched) return;
+      if ((groupIndex === 0 || Object.keys(this.groups[groupIndex - 1])?.length === 0) && !this.isAllFetched) return;
 
       const prevGroupIdx = (groupIndex - 1 + this.groups.length) % this.groups.length;
       const prevGroup = this.groups[prevGroupIdx];

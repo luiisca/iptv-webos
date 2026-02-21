@@ -1,7 +1,7 @@
 {
   "name": "com.iptv.webos",
   "private": true,
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "An intuitive iptv WebOS app for my parent's LG TV",
   "type": "module",
   "scripts": {

@@ -391,7 +391,7 @@
   :global(.menu-item) {
     margin: 5px 10px !important;
     border-radius: 10px !important;
-    transition: background-color 0.2s;
+    display: block !important;
   }
 
   :global(.menu-item.selected) {

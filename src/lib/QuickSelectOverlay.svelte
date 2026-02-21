@@ -8,6 +8,7 @@
   import Item from "./Item.svelte";
   import { appState } from "./appState.svelte";
   import Heading from "./Heading.svelte";
+  import type { Channel } from "./types";
 
   let numericInput = $state("");
   let selectedMatchIndex = $state(0);
@@ -23,32 +24,16 @@
 
     const groupMatches = appState.groups
       .map((group, gIdx) => {
-        const channel = group.channels[channelIndex];
+        let channel: Channel;
+        if (group.id === "favorites") {
+          channel = appState.favorites[parseInt(numericInput, 10).toString()];
+        } else {
+          channel = group.channels[channelIndex];
+        }
         if (!channel) return null;
         return { group, channel, groupIndex: gIdx + 1 };
       })
       .filter((m): m is any => m !== null);
-
-    const normalizedInput = parseInt(numericInput, 10).toString();
-    const favoriteChannel = appState.favorites[normalizedInput];
-    if (favoriteChannel) {
-      // Avoid duplicate if it's already in the matches (from the 'favorites' group)
-      const alreadyMatched = groupMatches.some(
-        (m) =>
-          m.group.id === "favorites" &&
-          m.channel.nanoid === favoriteChannel.nanoid,
-      );
-      if (!alreadyMatched) {
-        const favoriteGroup = appState.groups.find((g) => g.id === "favorites");
-        if (favoriteGroup) {
-          groupMatches.unshift({
-            group: favoriteGroup,
-            channel: favoriteChannel,
-            groupIndex: 0, // Special index for direct favorite match
-          });
-        }
-      }
-    }
 
     return groupMatches;
   });

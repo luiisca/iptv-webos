@@ -16,9 +16,6 @@
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
   let matches = $derived.by(() => {
-    // TODO: still failing after adding the very first favoriet channel
-    appState.favorites; // force update when new frist favorite added TODO: fix
-
     if (!numericInput) return [];
     const channelIndex = parseInt(numericInput, 10) - 1;
 

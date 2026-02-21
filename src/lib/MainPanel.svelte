@@ -66,7 +66,7 @@
       case 192:
         ev.preventDefault();
         if (appState.currentChannel) {
-          // TODO: removing all favorites should move to the last one
+          // TODO: removing all favorites should move to the last channel, currently sometimes removing favorites will change the channel
           appState.toggleFavorite(appState.currentChannel);
         }
         break;

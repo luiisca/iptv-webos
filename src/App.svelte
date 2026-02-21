@@ -36,14 +36,15 @@
         } catch (e) {}
       }
 
-      if (Object.keys(appState.favorites).length > 0) {
-        appState.groups = [
-          {
-            id: "favorites",
-            displayName: $t("Favorites"),
-            channels: appState.favoriteChannels,
-          },
-        ];
+      appState.groups = [
+        {
+          id: "favorites",
+          displayName: $t("Favorites"),
+          channels: appState.favoriteChannels,
+        },
+      ];
+      if (appState.favoriteChannels.length > 0) {
+        appState.setActiveGroupId("favorites");
       }
 
       appState.allCountryMetadata = await fetchCountryMetadata();
@@ -60,12 +61,14 @@
             ]?.country || appState.userMeta.countryCode,
           channels: userCountryChannels,
         });
+        if (!appState.activeGroupId) {
+          appState.setActiveGroupId(
+            appState.userMeta.countryCode.toLowerCase(),
+          );
+        }
       }
 
-      appState.setActiveGroupId(appState.groups[0].id);
-
       appState.isFetching = false;
-      console.log("groups", appState.groups);
 
       // Background fetch
       (async () => {
@@ -78,6 +81,10 @@
       appState.error = e.message || $t("Failed to initialize application.");
       appState.isFetching = false;
     }
+
+    window.addEventListener("keydown", (ev) => {
+      console.log(ev.keyCode);
+    });
   });
 </script>
 

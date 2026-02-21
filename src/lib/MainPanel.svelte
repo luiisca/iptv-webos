@@ -65,6 +65,7 @@
       case 403: // RED
         ev.preventDefault();
         if (appState.currentChannel) {
+          // TODO: removing all favorites should move to the last one
           appState.toggleFavorite(appState.currentChannel);
         }
         break;

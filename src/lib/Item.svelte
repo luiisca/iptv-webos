@@ -16,6 +16,7 @@
     disabled = false,
     class: className = "",
     onclick,
+    onfocus,
     ...rest
   } = $props();
 
@@ -39,8 +40,9 @@
     }
   });
 
-  function handleFocus() {
+  function handleFocus(ev: FocusEvent) {
     isFocused = true;
+    onfocus?.(ev);
   }
   function handleBlur() {
     isFocused = false;

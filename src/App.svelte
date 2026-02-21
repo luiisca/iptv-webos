@@ -7,6 +7,7 @@
     fetchCountryMetadata,
     fetchChannelsByCountry,
   } from "./lib/api";
+  import { checkConnectivity, launchTuner, closeApp } from "./lib/webOS";
   import MainPanel from "./lib/MainPanel.svelte";
   import Spinner from "./lib/Spinner.svelte";
   import ThemeDecorator from "./lib/ThemeDecorator.svelte";
@@ -16,6 +17,13 @@
   onMount(async () => {
     appState.isFetching = true;
     appState.error = null;
+
+    const isConnected = checkConnectivity();
+    if (!isConnected) {
+      await launchTuner();
+      closeApp();
+      return;
+    }
 
     try {
       appState.userMeta = await getUserMeta();
@@ -28,13 +36,15 @@
         } catch (e) {}
       }
 
-      appState.groups = [
-        {
-          id: "favorites",
-          displayName: $t("Favorites"),
-          channels: appState.favorites,
-        },
-      ];
+      if (Object.keys(appState.favorites).length > 0) {
+        appState.groups = [
+          {
+            id: "favorites",
+            displayName: $t("Favorites"),
+            channels: appState.favoriteChannels,
+          },
+        ];
+      }
 
       appState.allCountryMetadata = await fetchCountryMetadata();
 
@@ -52,13 +62,10 @@
         });
       }
 
-      const startGroupId =
-        appState.favorites.length > 0
-          ? "favorites"
-          : appState.groups[1]?.id || "favorites";
-      appState.setActiveGroupId(startGroupId);
+      appState.setActiveGroupId(appState.groups[0].id);
 
       appState.isFetching = false;
+      console.log("groups", appState.groups);
 
       // Background fetch
       (async () => {
@@ -75,7 +82,7 @@
 </script>
 
 <ThemeDecorator>
-  {#if appState.isFetching && appState.groups.length <= 1 && appState.favorites.length === 0}
+  {#if appState.isFetching && appState.groups.length <= 1 && Object.keys(appState.favorites).length === 0}
     <Spinner centered />
   {:else if appState.error && appState.groups.length <= 1}
     <div class="error">{appState.error}</div>

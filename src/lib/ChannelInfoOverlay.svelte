@@ -10,10 +10,14 @@
   let { visible } = $props();
 
   let channel = $derived(appState.currentChannel);
-  let channelNumber = $derived(appState.currentIndex + 1);
+  let channelNumber = $derived(
+    appState.activeGroupId === "favorites"
+      ? appState.currentChannel.channelNumber
+      : appState.currentIndex + 1,
+  );
   let isFavorite = $derived(
     channel
-      ? appState.favorites.some((f) => f.nanoid === channel.nanoid)
+      ? appState.favoriteChannels.some((f) => f.nanoid === channel.nanoid)
       : false,
   );
   let activeGroup = $derived(

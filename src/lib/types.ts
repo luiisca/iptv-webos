@@ -7,7 +7,7 @@ export interface Channel {
   language: string; // ISO 639-2/3 code (e.g., 'spa', 'eng')
   country: string;  // ISO 3166-1 alpha-2 code (e.g., 'PE', 'US')
   isGeoBlocked: boolean;
-  isBroadcast?: boolean;
+  channelNumber?: string;
 }
 
 export interface CountryMeta {
@@ -33,7 +33,7 @@ export interface AppState {
   groups: ChannelGroup[]; // Dynamic list of groups (favorites, countries, categories)
   activeGroupId: string;
   currentIndex: number;  // Current index within the active group
-  favorites: Channel[];
+  favorites: Record<string, Channel>;
   userMeta: UserMeta | null;
   fetchedGroupsCount: number; // Tracks how many non-favorites groups were fetched
   isFetching: boolean | null;

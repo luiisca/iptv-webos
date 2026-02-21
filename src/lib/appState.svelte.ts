@@ -20,7 +20,7 @@ class AppState {
   groups = $state<ChannelGroup[]>([]);
   activeGroupId = $state<string>('');
   currentIndex = $state<number>(0);
-  favorites = $state<Channel[]>([]);
+  favorites = $state<Record<string, Channel>>({});
   userMeta = $state<UserMeta | null>(null);
   fetchedGroupsCount = $state<number>(0);
   isFetching = $state<boolean | null>(null);
@@ -39,6 +39,13 @@ class AppState {
   });
 
   currentChannel = $derived(this.playlist[this.currentIndex] || null);
+
+  favoriteChannels = $derived.by(() => {
+    return Object.keys(this.favorites)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map(key => this.favorites[key.toString()]);
+  });
 
   setGroups(groups: ChannelGroup[]) {
     this.groups = groups;
@@ -61,21 +68,37 @@ class AppState {
     this.currentIndex = 0;
   }
 
-  setFavorites(favorites: Channel[]) {
+  setFavorites(favorites: Record<string, Channel>) {
     this.favorites = favorites;
     localStorage.setItem('favorites', JSON.stringify(favorites));
-    this.updateGroupChannels('favorites', favorites);
+
+    this.updateGroupChannels('favorites', this.favoriteChannels);
   }
 
   toggleFavorite(channel: Channel) {
-    const isFavorite = this.favorites.some(f => f.nanoid === channel.nanoid);
+    const favoriteEntries = Object.entries(this.favorites);
+    const existingEntry = favoriteEntries.find(([_, f]) => f.nanoid === channel.nanoid);
     const _t = get(t);
-    if (isFavorite) {
-      this.favorites = this.favorites.filter(f => f.nanoid !== channel.nanoid);
+
+    if (existingEntry) {
+      const [key] = existingEntry;
+      const existingFavs = { ...this.favorites };
+      delete existingFavs[key];
+      this.favorites = existingFavs;
       this.showAlert(_t('Removed {{name}} from favorites', { name: channel.name }));
     } else {
-      this.favorites = [...this.favorites, channel];
-      this.showAlert(_t('Added {{name}} to favorites', { name: channel.name }));
+      // Find the first gap
+      const keys = Object.keys(this.favorites).map(Number).sort((a, b) => a - b);
+      let newKey = 1;
+      for (const key of keys) {
+        if (key === newKey) {
+          newKey++;
+        } else if (key > newKey) {
+          break;
+        }
+      }
+      this.favorites = { ...this.favorites, [newKey.toString()]: { ...channel, channelNumber: newKey.toString() } };
+      this.showAlert(_t('Added {{name}} to favorites at channel {{number}}', { name: channel.name, number: newKey }));
     }
     this.setFavorites(this.favorites);
   }
@@ -146,6 +169,7 @@ class AppState {
           });
         }
       } else {
+        this.isAllFetched = true;
         return false;
       }
       this.fetchedGroupsCount += 1;

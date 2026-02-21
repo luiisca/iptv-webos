@@ -15,15 +15,41 @@
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
   let matches = $derived.by(() => {
+    appState.favorites; // force update when new frist favorite added TODO: fix
+
     if (!numericInput) return [];
     const channelIndex = parseInt(numericInput, 10) - 1;
-    return appState.groups
+
+    const groupMatches = appState.groups
       .map((group, gIdx) => {
         const channel = group.channels[channelIndex];
         if (!channel) return null;
         return { group, channel, groupIndex: gIdx + 1 };
       })
       .filter((m): m is any => m !== null);
+
+    const normalizedInput = parseInt(numericInput, 10).toString();
+    const favoriteChannel = appState.favorites[normalizedInput];
+    if (favoriteChannel) {
+      // Avoid duplicate if it's already in the matches (from the 'favorites' group)
+      const alreadyMatched = groupMatches.some(
+        (m) =>
+          m.group.id === "favorites" &&
+          m.channel.nanoid === favoriteChannel.nanoid,
+      );
+      if (!alreadyMatched) {
+        const favoriteGroup = appState.groups.find((g) => g.id === "favorites");
+        if (favoriteGroup) {
+          groupMatches.unshift({
+            group: favoriteGroup,
+            channel: favoriteChannel,
+            groupIndex: 0, // Special index for direct favorite match
+          });
+        }
+      }
+    }
+
+    return groupMatches;
   });
 
   function handleQuickSelect(idx: number) {

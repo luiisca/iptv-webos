@@ -1,6 +1,6 @@
 {
   "id": "com.iptv.webos",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "vendor": "LuiisCA",
   "type": "web",
   "main": "index.html",
